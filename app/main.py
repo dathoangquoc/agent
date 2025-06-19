@@ -1,6 +1,8 @@
 import os
 import asyncio
 
+# OpenAI Agent
+
 from agents.extensions.models.litellm_model import LitellmModel
 from agents import (
     Agent, 
@@ -8,6 +10,8 @@ from agents import (
     function_tool,
     set_tracing_disabled
 )
+
+from mem0 import Memory
 
 BASE_URL = os.getenv("BASE_URL")
 API_KEY = os.getenv("API_KEY")
@@ -31,6 +35,12 @@ def retrieve_document(query: str):
 instructions = "You are a helpful AI."
 
 # Memory
+config = {
+    "llm": {
+
+    },
+}
+m = Memory()
 
 async def main():
     agent = Agent(
