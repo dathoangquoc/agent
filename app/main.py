@@ -17,22 +17,22 @@ BASE_URL = os.getenv("BASE_URL")
 API_KEY = os.getenv("API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
-# Agent
 
-model = LitellmModel(model=f"openai/{MODEL_NAME}", base_url=BASE_URL, api_key=API_KEY)
-set_tracing_disabled(True)
-
+# Tools
 @function_tool
 def schedule_meeting(time: str):
     """Schedule a meeting at a chosen time"""
     return f"Meeting has been scheduled at {time}"
 
 @function_tool
-def retrieve_document(query: str):
+def search_document(query: str):
     """Search for a document based on query"""
     return f"No document were found"
 
-instructions = "You are a helpful AI."
+@function_tool
+def search_web(query: str):
+    """Search online sources"""
+    return f"Found no info"
 
 # Memory
 config = {
@@ -42,14 +42,25 @@ config = {
 }
 m = Memory()
 
-async def main():
-    agent = Agent(
-        name="Main Agent",
-        model=model,
-        instructions=instructions,
-        tools=[schedule_meeting, retrieve_document],
-    )
+def add_memory(user: str):
+    pass
 
+def search_memory(user: str):
+    pass
+
+# Agents
+
+model = LitellmModel(model=f"openai/{MODEL_NAME}", base_url=BASE_URL, api_key=API_KEY)
+set_tracing_disabled(True)
+
+agent = Agent(
+    name="Main Agent",
+    model=model,
+    instructions="You are a helpful AI",
+    tools=[schedule_meeting, search_document, search_web],
+)
+
+async def main():
     result = await Runner.run(agent, "Search for documents on LLM")
     print(result)
 

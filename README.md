@@ -6,7 +6,7 @@
 ├── Dockerfile            # Docker configuration for containerization
 ├── README.md             # Project description, setup instructions, etc.
 ├── pyproject.toml        # Project metadata and dependencies
-├── uv.lock               # Generated lockfile by uv (for reproducible environments)
+├── uv.lock               # uv lockfile
 ├── setup.py              # For packaging and distributing your application (if applicable)
 │
 ├── app/                  # Main application source code
