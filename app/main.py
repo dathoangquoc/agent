@@ -44,26 +44,44 @@ def search_web(query: str):
     """Search online sources"""
     return f"Found no info"
 
-# TODO: mem0 config
+# TODO: add mem0 config
 config = {
     "llm": {
 
     },
 }
-# m = Memory()
 
-def add_memory(user: str):
-    pass
+memory = Memory()
 
-def search_memory(user: str):
-    pass
+@function_tool
+def search_memories(message: str, user_id: str) -> str:
+    """Search for user memories
+
+    Args:
+        message: user's message
+        user_id: user ID
+    """
+    relevant_memories = memory.search(message, user_id, limit=3)
+    formatted_memories = "\n".join([f"{entry['memory']}" for entry in relevant_memories["results"]])
+
+    return formatted_memories
+
+@function_tool
+def add_memories(messages: list[dict[str, str]], user_id: str):
+    """Add new messages to user memories
+
+    Args:
+        messages: list of messages in the current conversation
+        user_id: user ID
+    """
+    memory.add(messages, user_id)
 
 # Agents
 
 model = LitellmModel(model=f"openai/{MODEL_NAME}", base_url=BASE_URL, api_key=API_KEY)
 set_tracing_disabled(True)
 
-### Guardrail
+# Guardrail
 guardrail_agent = Agent(
     name="Input Guardrail",
     instructions="Check if the user is asking questions unrelated to the career service",
