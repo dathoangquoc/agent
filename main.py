@@ -1,5 +1,7 @@
 import os
 import asyncio
+from dataclasses import dataclass
+from random import randint
 
 # Pydantic
 from pydantic import BaseModel
@@ -35,14 +37,9 @@ def schedule_meeting(time: str):
     return f"Meeting has been scheduled at {time}"
 
 @function_tool
-def search_document(query: str):
-    """Search for a document based on query"""
-    return f"No document were found"
-
-@function_tool
-def search_web(query: str):
-    """Search online sources"""
-    return f"Found no info"
+def search_jobs(query: str):
+    """Search for a jobs based on a query"""
+    return f"No jobs found"
 
 # TODO: add mem0 config
 config = {
@@ -51,54 +48,66 @@ config = {
     },
 }
 
-memory = Memory()
+# memory = Memory()
 
-@function_tool
-def search_memories(message: str, user_id: str) -> str:
-    """Search for user memories
+# @function_tool
+# def search_memories(message: str, user_id: str) -> str:
+#     """Search for user memories
 
-    Args:
-        message: user's message
-        user_id: user ID
-    """
-    relevant_memories = memory.search(message, user_id, limit=3)
-    formatted_memories = "\n".join([f"{entry['memory']}" for entry in relevant_memories["results"]])
+#     Args:
+#         message: user's message
+#         user_id: user ID
+#     """
+#     relevant_memories = memory.search(message, user_id, limit=3)
+#     formatted_memories = "\n".join([f"{entry['memory']}" for entry in relevant_memories["results"]])
 
-    return formatted_memories
+#     return formatted_memories
 
-@function_tool
-def add_memories(messages: list[dict[str, str]], user_id: str):
-    """Add new messages to user memories
+# @function_tool
+# def add_memories(messages: list[dict[str, str]], user_id: str):
+#     """Add new messages to user memories
 
-    Args:
-        messages: list of messages in the current conversation
-        user_id: user ID
-    """
-    memory.add(messages, user_id)
+#     Args:
+#         messages: list of messages in the current conversation
+#         user_id: user ID
+#     """
+#     memory.add(messages, user_id)
 
 # Agents
 
 model = LitellmModel(model=f"openai/{MODEL_NAME}", base_url=BASE_URL, api_key=API_KEY)
 set_tracing_disabled(True)
 
+job_search_agent = Agent(
+    name="Job Recommendation Agent",
+    instructions="Search for suitable jobs for the user",
+    model=model,
+    tools=[search_jobs]
+)
+
+cv_review_agent = Agent(
+    name="Job Recommendation Agent",
+    instructions="Review the user CV",
+    model=model,
+)
+
 # Guardrail
+class CareerServiceOutput(BaseModel):
+    reasoning: str
+    is_career_inquiry: bool
+
 guardrail_agent = Agent(
     name="Input Guardrail",
     instructions="Check if the user is asking questions unrelated to the career service",
     model=model,
+    output_type=CareerServiceOutput
 )
-
-class CareerServiceOutput():
-    reasoning: str
-    is_career_inquiry: bool
-
 
 @input_guardrail
 async def career_guardrail(
     agent: Agent, input: str | list[TResponseInputItem], context: RunContextWrapper[None]
 ) -> GuardrailFunctionOutput:
-    """Check if the input is unrelated to the career service
-    """
+    
     result = await Runner.run(agent, input, context=context)
     final_output = result.final_output_as(CareerServiceOutput)
 
@@ -113,9 +122,9 @@ triage_agent = Agent(
     name="Triage Agent",
     instructions="Handoff to the appropriate agent based on the user's requested service(s)",
     model=model,
-    handoffs=[],
-    input_guardrails=[career_guardrail],
-    tools=[schedule_meeting, search_document, search_web],
+    handoffs=[job_search_agent, cv_review_agent],
+    # input_guardrails=[career_guardrail],
+    # tools=[schedule_meeting, search_document, search_web],
 )
 
 
@@ -143,7 +152,6 @@ async def main():
                     "content": message
                 }
             )
-
 
 if __name__ == "__main__":
     asyncio.run(main())
