@@ -11,12 +11,14 @@ name = "agent"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "litellm" },
     { name = "mem0ai" },
     { name = "openai-agents", extra = ["litellm"] },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "litellm", specifier = ">=1.72.6" },
     { name = "mem0ai", specifier = ">=0.1.109" },
     { name = "openai-agents", extras = ["litellm"], specifier = ">=0.0.18" },
 ]
