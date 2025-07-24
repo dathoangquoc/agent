@@ -10,9 +10,7 @@ class LiteLLMClient():
     def complete(
             self, 
             messages: list[dict[str:str]] = [], 
-            temperature: float = None,
-            top_p: float = None,
-            max_tokens: int = None,
+            **kwargs
         ) -> str:
         
         response = completion(
@@ -33,8 +31,7 @@ class LiteLLMClient():
         # Parse tool
 
         # Logging:
-        # https://docs.litellm.ai/docs/completion/token_usage
-        # https://docs.litellm.ai/docs/observability/callbacks
+        # langfuse: https://docs.litellm.ai/docs/observability/callbacks
 
         return response
 
