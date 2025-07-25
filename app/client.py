@@ -43,9 +43,6 @@ class LiteLLMClient():
 
         # Parse tool
 
-        # Logging:
-        # langfuse: https://docs.litellm.ai/docs/observability/callbacks
-
         return response
 
     async def stream(self, messages: list[dict[str:str]] = []):
