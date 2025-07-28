@@ -37,9 +37,11 @@ class LiteLLMClient():
             custom_llm_provider=self.custom_llm_provider,
         )
 
-        # Handle failure
+        # Handle failure https://docs.litellm.ai/docs/completion/reliable_completions
 
-        # Parse reasoning
+        # Parse reasoning https://docs.litellm.ai/docs/reasoning_content
+        # reasoning = response.choices[0].message.reasoning_content or "No reasoning"
+        # message = response['choices'][0]['message']['content']
 
         # Parse tool
 
@@ -51,3 +53,26 @@ class LiteLLMClient():
     # Multiple call to 1 model
     def batch_complete(self, messages: list[dict[str:str]] = []):
         return batch_completion(model=self.model, messages=messages)
+    
+def main():
+    client = LiteLLMClient(
+        model=os.environ["MODEL_NAME"],
+        api_key=os.environ["API_KEY"],
+        base_url=os.environ["BASE_URL"],
+        custom_llm_provider="ollama_chat"
+    )
+
+    messages = [
+        {
+            "role": "user",
+            "content": "Tell me in a short sentence what can you do"
+        }
+    ]
+
+    reasoning, message = client.complete(messages=messages, max_tokens = 5000)
+    print("Reasoning:", reasoning)
+    print("Message:", message)
+
+if __name__ == "__main__":
+    main()
+
