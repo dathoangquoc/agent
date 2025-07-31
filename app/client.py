@@ -1,10 +1,16 @@
 import os
 import litellm
+import asyncio
+from typing import List, TypedDict, AsyncGenerator
 from langfuse import observe
-from litellm import completion, batch_completion
+from litellm import completion, acompletion, batch_completion
 from dotenv import load_dotenv
 
 load_dotenv()
+
+class Message(TypedDict):
+    role: str
+    content: str
 
 class LiteLLMClient():
 
@@ -17,44 +23,54 @@ class LiteLLMClient():
     @observe
     def complete(
             self, 
-            messages: list[dict[str:str]] = [], 
+            messages: List[Message], 
             **kwargs
-        ) -> str:
-
-        # read kwargs
-        temperature = kwargs.get("temperature", None)
-        top_p = kwargs.get("top_p", None)
-        max_tokens = kwargs.get("max_tokens", None)
+        ):
         
         response = completion(
             model=self.model, 
             messages=messages,
-            temperature=temperature,
-            top_p=top_p,
-            max_tokens=max_tokens,
             base_url=self.base_url,
             api_key=self.api_key,
             custom_llm_provider=self.custom_llm_provider,
+            **kwargs
         )
 
-        # Handle failure https://docs.litellm.ai/docs/completion/reliable_completions
+        reasoning = response.choices[0].message.reasoning_content or ""
+        reply = response.choices[0].message.content
 
-        # Parse reasoning https://docs.litellm.ai/docs/reasoning_content
-        # reasoning = response.choices[0].message.reasoning_content or "No reasoning"
-        # message = response['choices'][0]['message']['content']
+        return {
+            "content": reply,
+            "reasoning_content": reasoning
+        }
 
-        # Parse tool
+    @observe
+    async def stream(
+        self, 
+        messages: List[Message],
+        **kwargs
+    ) -> AsyncGenerator:
+        response = await acompletion(
+            model=self.model,
+            messages=messages,
+            base_url=self.base_url,
+            api_key=self.api_key,
+            custom_llm_provider=self.custom_llm_provider,
+            stream=True,
+            **kwargs
+        )
 
-        return response
-
-    async def stream(self, messages: list[dict[str:str]] = []):
-        return completion(model=self.model, messages=messages, stream=True)
+        async for chunk in response:
+            reply = chunk.choices[0].delta.content
+            if reply:
+                yield reply
+        
 
     # Multiple call to 1 model
-    def batch_complete(self, messages: list[dict[str:str]] = []):
+    def batch_complete(self, messages: List[Message]):
         return batch_completion(model=self.model, messages=messages)
     
-def main():
+async def main():
     client = LiteLLMClient(
         model=os.environ["MODEL_NAME"],
         api_key=os.environ["API_KEY"],
@@ -69,10 +85,9 @@ def main():
         }
     ]
 
-    reasoning, message = client.complete(messages=messages, max_tokens = 5000)
-    print("Reasoning:", reasoning)
-    print("Message:", message)
+    async for chunk in client.stream(messages, max_tokens=1000):
+        print(chunk, end='', flush=True)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
