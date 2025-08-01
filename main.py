@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from app.client import LiteLLMClient
 from app.config import Config
 
-class main():
+def main():
     load_dotenv()
 
     client = LiteLLMClient(
@@ -11,3 +11,15 @@ class main():
         base_url=Config.BASE_URL,
         custom_llm_provider=Config.CUSTOM_LLM_PROVIDER
     )
+
+    messages = [
+        {
+            "role": "user",
+            "content": "Tell me in a short sentence what can you do"
+        }
+    ]
+
+    print(client.complete(messages=messages, debug=True))
+
+if __name__ == "__main__":
+    main()

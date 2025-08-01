@@ -1,10 +1,10 @@
 import os
 
 class Config:
-    MODEL_NAME = os.environ["MODEL_NAME"],
-    API_KEY = os.environ["API_KEY"],
-    BASE_URL = os.environ["BASE_URL"],
-    CUSTOM_LLM_PROVIDER = "ollama_chat",
+    MODEL_NAME = os.environ["MODEL_NAME"]
+    API_KEY = os.environ["API_KEY"]
+    BASE_URL = os.environ["BASE_URL"]
+    CUSTOM_LLM_PROVIDER = os.environ["CUSTOM_LLM_PROVIDER"]
 
     if not MODEL_NAME:
         raise ValueError("MODEL_NAME is not set")
