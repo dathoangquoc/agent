@@ -4,13 +4,13 @@ import asyncio
 from typing import List, TypedDict, AsyncGenerator
 from langfuse import observe
 from litellm import completion, acompletion, batch_completion
-from dotenv import load_dotenv
-
-load_dotenv()
 
 class Message(TypedDict):
     role: str
     content: str
+
+# Drop unsupported params by provider
+litellm.drop_params = True
 
 class LiteLLMClient():
 
@@ -23,7 +23,8 @@ class LiteLLMClient():
     @observe
     def complete(
             self, 
-            messages: List[Message], 
+            messages: List[Message],
+            debug: bool = None, 
             **kwargs
         ):
         
@@ -36,13 +37,13 @@ class LiteLLMClient():
             **kwargs
         )
 
-        reasoning = getattr(response.choices[0].message, "reasoning_content", "")
-        reply = response.choices[0].message.content
+        reasoning_content = getattr(response.choices[0].message, "reasoning_content", "")
+        output_content = response.choices[0].message.content
 
-        return {
-            "content": reply,
-            "reasoning_content": reasoning
-        }
+        if debug:
+            return reasoning_content + "\n\n" + output_content
+
+        return output_content
 
     @observe
     async def stream(
@@ -64,7 +65,6 @@ class LiteLLMClient():
             reply = chunk.choices[0].delta.content
             if reply:
                 yield reply
-        
 
     @observe
     def batch_complete(
@@ -124,15 +124,4 @@ def batch_test(client):
     replies = client.batch_complete(messages_list)
     for reply in replies:
         print(reply)
-
-if __name__ == "__main__":
-    client = LiteLLMClient(
-        model=os.environ["MODEL_NAME"],
-        api_key=os.environ["API_KEY"],
-        base_url=os.environ["BASE_URL"],
-        custom_llm_provider="ollama_chat"
-    )
-
-    # asyncio.run(stream_test(client))
-    batch_test(client)
 
