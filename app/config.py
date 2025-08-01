@@ -1,20 +1,36 @@
 import os
 
 class Config:
-    MODEL_NAME = os.environ["MODEL_NAME"]
-    API_KEY = os.environ["API_KEY"]
-    BASE_URL = os.environ["BASE_URL"]
-    CUSTOM_LLM_PROVIDER = os.environ["CUSTOM_LLM_PROVIDER"]
+    MODEL: str
+    API_KEY: str
+    BASE_URL: str
+    CUSTOM_LLM_PROVIDER: str = None
+    
+    def __init__(self, model, api_key, base_url, custom_llm_provider=None):
+        self.MODEL = model
+        self.API_KEY = api_key
+        self.BASE_URL = base_url
+        self.CUSTOM_LLM_PROVIDER = custom_llm_provider
 
-    if not MODEL_NAME:
-        raise ValueError("MODEL_NAME is not set")
+    @classmethod
+    def load(cls):
+        model = os.environ["MODEL"]
+        api_key = os.environ["API_KEY"]
+        base_url = os.environ["BASE_URL"]
+        custom_llm_provider = os.environ["CUSTOM_LLM_PROVIDER"]
     
-    if not API_KEY:
-        raise ValueError("API_KEY is not set")
+        if not model:
+            raise ValueError("MODEL is not set")
+        
+        if not api_key:
+            raise ValueError("API_KEY is not set")
+        
+        if not base_url:
+            raise ValueError("BASE_URL is not set")
     
-    if not BASE_URL:
-        raise ValueError("BASE_URL is not set")
-    
-    if not CUSTOM_LLM_PROVIDER:
-        raise ValueError("CUSTOM_LLM_PROVIDER is not set")
-    
+        return cls(
+            model=model,
+            api_key=api_key,
+            base_url=base_url,
+            custom_llm_provider=custom_llm_provider
+        )

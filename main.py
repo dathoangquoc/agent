@@ -1,25 +1,35 @@
+import os
 from dotenv import load_dotenv
 from app.client import LiteLLMClient
-from app.config import Config
+from app.config import Config    
+
+ENV_PATH = "./.env.test"
 
 def main():
-    load_dotenv()
+    if os.path.exists(ENV_PATH):
+        load_dotenv(ENV_PATH)
+    else:
+        print("Not found env")
 
+    config = Config.load()
+    
     client = LiteLLMClient(
-        model=Config.MODEL_NAME,
-        api_key=Config.API_KEY,
-        base_url=Config.BASE_URL,
-        custom_llm_provider=Config.CUSTOM_LLM_PROVIDER
+        model=config.MODEL,
+        api_key=config.API_KEY,
+        base_url=config.BASE_URL,
+        custom_llm_provider=config.CUSTOM_LLM_PROVIDER
     )
 
     messages = [
         {
             "role": "user",
-            "content": "Tell me in a short sentence what can you do"
+            "content": "Explain how AI works in a few words"
         }
     ]
 
-    print(client.complete(messages=messages, debug=True))
+    response = client.complete(messages=messages, debug=True) 
+
+    print(response)
 
 if __name__ == "__main__":
     main()
