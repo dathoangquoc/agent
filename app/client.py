@@ -2,31 +2,28 @@ import os
 import litellm
 import asyncio
 from typing import List, TypedDict, AsyncGenerator
-from langfuse import observe
+from langfuse import observe, get_client
 from litellm import completion, acompletion, batch_completion
-
-class Message(TypedDict):
-    role: str
-    content: str
-
-# Drop unsupported params by provider
-litellm.drop_params = True
+from .message import ResponseInput, ResponseOutput
 
 class LiteLLMClient():
 
-    def __init__(self, model: str, api_key: str, base_url: str, custom_llm_provider: str = None):
+    def __init__(self, model: str, api_key: str, base_url: str, custom_llm_provider: str = None, ):
         self.model = model
         self.api_key = api_key
         self.base_url = base_url
         self.custom_llm_provider = custom_llm_provider
 
-    @observe
+        # Drop unsupported params by provider
+        litellm.drop_params = True
+        litellm.callbacks = ["langfuse_otel"]
+
     def complete(
             self, 
-            messages: List[Message],
+            messages: List[ResponseInput],
             debug: bool = None, 
             **kwargs
-        ):
+        ) -> ResponseOutput:
         
         response = completion(
             model=self.model, 
@@ -45,10 +42,9 @@ class LiteLLMClient():
 
         return output_content
 
-    @observe
     async def stream(
         self, 
-        messages: List[Message],
+        messages: List[ResponseInput],
         **kwargs
     ) -> AsyncGenerator:
         response = await acompletion(
@@ -66,12 +62,11 @@ class LiteLLMClient():
             if reply:
                 yield reply
 
-    @observe
     def batch_complete(
         self,
-        messages: List[List[Message]],
+        messages: List[List[ResponseInput]],
         **kwargs
-    ):
+    ) -> List[ResponseOutput]:
         responses = batch_completion(
             model=self.model,
             messages=messages,

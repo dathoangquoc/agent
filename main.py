@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from app.client import LiteLLMClient
 from app.config import Config    
 
-ENV_PATH = "./.env.test"
+ENV_PATH = "./.env.local"
 
 def main():
     if os.path.exists(ENV_PATH):
@@ -12,6 +12,7 @@ def main():
         print("Not found env")
 
     config = Config.load()
+    config.register_custom_model()
     
     client = LiteLLMClient(
         model=config.MODEL,
@@ -27,7 +28,11 @@ def main():
         }
     ]
 
-    response = client.complete(messages=messages, debug=True) 
+    response = client.complete(
+        messages=messages,
+        debug=True,
+        max_tokens = 10000
+    ) 
 
     print(response)
 

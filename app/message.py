@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict, Required
+from typing import Literal, TypedDict, Required, Any
 
 class Message(TypedDict):
     content: Required[str]
@@ -12,11 +12,11 @@ class ToolCall(TypedDict):
     name: Required[str]
     """The name of the function to call"""
 
-    arguments: Required[str]
+    arguments: Required[dict[str: Any]]
     """A JSON string of the arguments to pass to the function"""
 
 class ToolCallOutput(TypedDict):
-    output: Required[str]
+    output: Required[dict[str: Any]]
     """A JSON string of the output of the function tool call"""
 
 class Reasoning(TypedDict):
@@ -28,5 +28,5 @@ class ImageInput(TypedDict):
     """The url of the uploaded image"""
 
 
-ResponseInput = Message | ToolCallOutput | Reasoning
+ResponseInput = Message | ToolCallOutput | Reasoning | ImageInput
 ResponseOutput = MessageOutput | ToolCall | Reasoning

@@ -1,4 +1,5 @@
 import os
+import litellm
 
 class Config:
     MODEL: str
@@ -34,3 +35,11 @@ class Config:
             base_url=base_url,
             custom_llm_provider=custom_llm_provider
         )
+    
+    def register_custom_model(self):
+        litellm.register_model({
+            "qwen3:4b": {
+                "input_cost_per_token": 0.00000000011,
+                "output_cost_per_token": 0.00000000126,
+            }
+        })
