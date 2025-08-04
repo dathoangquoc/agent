@@ -1,18 +1,32 @@
-from typing import Optional, List, Literal, Union, Dict
+from typing import Literal, TypedDict, Required
 
-# From Litellm
-class Message():
-    content: Optional[str]
-    role: Literal["assistant", "user", "system", "tool", "function"]
-    # tool_calls: Optional[List[ChatCompletionMessageToolCall]]
-    # function_call: Optional[FunctionCall]
-    # audio: Optional[ChatCompletionAudioResponse] = None
-    reasoning_content: Optional[str] = None
-    # thinking_blocks: Optional[
-    #     List[Union[ChatCompletionThinkingBlock, ChatCompletionRedactedThinkingBlock]]
-    # ] = None
-    provider_specific_fields: Optional[Dict[str, Any]] = Field(
-        default=None, exclude=True
-    )
-    # annotations: Optional[List[ChatCompletionAnnotation]] = None
+class Message(TypedDict):
+    content: Required[str]
+    role: Required[Literal["user", "system", "assistant"]]
 
+class MessageOutput(TypedDict):
+    content: Required[str]
+    role: Required[Literal["assistant"]]
+
+class ToolCall(TypedDict):
+    name: Required[str]
+    """The name of the function to call"""
+
+    arguments: Required[str]
+    """A JSON string of the arguments to pass to the function"""
+
+class ToolCallOutput(TypedDict):
+    output: Required[str]
+    """A JSON string of the output of the function tool call"""
+
+class Reasoning(TypedDict):
+    content: Required[str]
+    """The reasoning content"""
+
+class ImageInput(TypedDict):
+    image_url: Required[str]
+    """The url of the uploaded image"""
+
+
+ResponseInput = Message | ToolCallOutput | Reasoning
+ResponseOutput = MessageOutput | ToolCall | Reasoning
