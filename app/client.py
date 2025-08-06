@@ -4,7 +4,7 @@ import asyncio
 from typing import List, TypedDict, AsyncGenerator
 from langfuse import observe, get_client
 from litellm import completion, acompletion, batch_completion
-from .message import ResponseInput, ResponseOutput
+from message import ResponseInput, ResponseOutput
 
 class LiteLLMClient():
 
