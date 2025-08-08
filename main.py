@@ -63,10 +63,47 @@ def completion_test(client: LiteLLMClient):
         session_id="1",
         user_id="1",
         max_tokens = 10000,
+        top_p = 0.3,
+        reasoning_effort = 'low',
+        temperature = 0.2
         ) 
 
     print(response)
 
+def batch_completion_test(client: LiteLLMClient):
+    messages_list = [
+        [
+            {
+                "role": "user",
+                "content": "Explain how AI works in a few words"
+            }   
+        ],
+        [
+            {
+                "role": "user",
+                "content": "Explain how Machine Learning works in a few words"
+            }   
+        ],
+        [
+            {
+                "role": "user",
+                "content": "Explain how Computer Vision works in a few words"
+            }   
+        ]
+    ]
+
+    for response in client.batch_complete(
+        messages=messages_list,
+        debug=True,
+        session_id="1",
+        user_id="1",
+        max_completion_tokens=500,
+        max_tokens=100,
+        top_p=0.3,
+        reasoning_effort = 'low',
+        temperature = 0.2,
+    ):
+        print(response)
         
 if __name__ == "__main__":
     if os.path.exists(ENV_PATH):
@@ -87,5 +124,6 @@ if __name__ == "__main__":
         tracing_client=tracing_client
     )
 
-    asyncio.run(chat_loop(client))
+    # asyncio.run(chat_loop(client))
     # completion_test(client)
+    batch_completion_test(client)

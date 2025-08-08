@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
+from typing import Required, Optional, Any
 
 from langfuse import get_client
 
 class TracingClient(ABC):
     @abstractmethod
-    def update_trace(self, response, session_id: str = None, user_id: str = None):
+    def update_trace(self, model: str, response: str, session_id: str = None, user_id: str = None):
         pass
 
 class LangfuseClient(TracingClient):

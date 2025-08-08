@@ -100,20 +100,19 @@ class LiteLLMClient():
             **kwargs
         )
 
-        self.tracing_client.update_trace(
-            model=self.model,
-            response=response,
-            session_id=session_id,
-            user_id=user_id
-        )
-
         replies = []
         for response in responses:
-            replies.append(
-                {
-                    "content": response.choices[0].message.content,
-                    "reasoning_content": getattr(response.choices[0].message, "reasoning_content", "")
-                }
-            ) 
+            self.tracing_client.update_trace(
+                model=self.model,
+                response=response,
+                session_id=session_id,
+                user_id=user_id
+            )
+
+            reasoning_content = getattr(response.choices[0].message, "reasoning_content", "")
+            output_content = response.choices[0].message.content
+            debug_content = reasoning_content + "\n\n" + output_content
+
+            replies.append(debug_content) 
 
         return replies
