@@ -1,30 +1,40 @@
-import os
-import litellm
-import asyncio
 from typing import List, TypedDict, AsyncGenerator
-from langfuse import observe, get_client
+
+import litellm
 from litellm import completion, acompletion, batch_completion
-from message import ResponseInput, ResponseOutput
+from langfuse import observe, get_client
+
+from .message import ResponseInput, ResponseOutput
+from .tracing import TracingClient
 
 class LiteLLMClient():
 
-    def __init__(self, model: str, api_key: str, base_url: str, custom_llm_provider: str = None, ):
+    def __init__(
+            self, 
+            model: str, 
+            api_key: str, 
+            base_url: str, 
+            tracing_client: TracingClient,
+            custom_llm_provider: str = None,
+        ):
         self.model = model
         self.api_key = api_key
         self.base_url = base_url
         self.custom_llm_provider = custom_llm_provider
+        self.tracing_client = tracing_client
 
         # Drop unsupported params by provider
         litellm.drop_params = True
-        litellm.callbacks = ["langfuse_otel"]
 
+    @observe(as_type="generation")
     def complete(
             self, 
             messages: List[ResponseInput],
-            debug: bool = None, 
+            debug: bool = None,
+            session_id: str = None,
+            user_id: str = None, 
             **kwargs
         ) -> ResponseOutput:
-        
         response = completion(
             model=self.model, 
             messages=messages,
@@ -36,15 +46,26 @@ class LiteLLMClient():
 
         reasoning_content = getattr(response.choices[0].message, "reasoning_content", "")
         output_content = response.choices[0].message.content
+        debug_content = reasoning_content + "\n\n" + output_content
+
+        self.tracing_client.update_trace(
+            model=self.model,
+            response=response,
+            user_id=user_id,
+            session_id=session_id
+        )
 
         if debug:
-            return reasoning_content + "\n\n" + output_content
+            return debug_content
 
         return output_content
 
+    @observe(as_type='generation')
     async def stream(
         self, 
         messages: List[ResponseInput],
+        session_id: str = None,
+        user_id: str = None, 
         **kwargs
     ) -> AsyncGenerator:
         response = await acompletion(
@@ -62,9 +83,12 @@ class LiteLLMClient():
             if reply:
                 yield reply
 
+    @observe(as_type='generation')
     def batch_complete(
         self,
         messages: List[List[ResponseInput]],
+        session_id: str = None,
+        user_id: str = None,     
         **kwargs
     ) -> List[ResponseOutput]:
         responses = batch_completion(
@@ -74,6 +98,13 @@ class LiteLLMClient():
             api_key=self.api_key,
             custom_llm_provider=self.custom_llm_provider,
             **kwargs
+        )
+
+        self.tracing_client.update_trace(
+            model=self.model,
+            response=response,
+            session_id=session_id,
+            user_id=user_id
         )
 
         replies = []
@@ -86,37 +117,3 @@ class LiteLLMClient():
             ) 
 
         return replies
-    
-### TEST
-
-async def stream_test(client):
-    messages = [
-        {
-            "role": "user",
-            "content": "Tell me in a short sentence what can you do"
-        }
-    ]
-
-    async for chunk in client.stream(messages, max_tokens=1000):
-        print(chunk, end='', flush=True)
-
-def batch_test(client):
-    messages_list = [
-        [
-            {
-                "role": "user",
-                "content": "Tell me in a short sentence what can you do"
-            }
-        ],
-        [
-            {
-                "role": "user",
-                "content": "Good morning"
-            }
-        ]
-    ]
-
-    replies = client.batch_complete(messages_list)
-    for reply in replies:
-        print(reply)
-

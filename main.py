@@ -1,9 +1,12 @@
 import os
 import uuid
 import asyncio
+
 from dotenv import load_dotenv
+
 from app.client import LiteLLMClient
 from app.config import Config    
+from app.tracing import LangfuseClient
 
 ENV_PATH = "./.env.local"
 
@@ -57,10 +60,10 @@ def completion_test(client: LiteLLMClient):
     response = client.complete(
         messages=messages,
         debug=True,
+        session_id="1",
+        user_id="1",
         max_tokens = 10000,
-        litellm_session_id = "321",
-        user = "f"
-    ) 
+        ) 
 
     print(response)
 
@@ -74,12 +77,15 @@ if __name__ == "__main__":
     config = Config.load()
     config.register_custom_model()
     
+    tracing_client = LangfuseClient()
+
     client = LiteLLMClient(
         model=config.MODEL,
         api_key=config.API_KEY,
         base_url=config.BASE_URL,
-        custom_llm_provider=config.CUSTOM_LLM_PROVIDER
+        custom_llm_provider=config.CUSTOM_LLM_PROVIDER,
+        tracing_client=tracing_client
     )
 
-    # asyncio.run(chat_loop(client))
-    completion_test(client)
+    asyncio.run(chat_loop(client))
+    # completion_test(client)
