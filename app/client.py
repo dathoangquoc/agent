@@ -7,6 +7,7 @@ from langfuse import observe, get_client
 from .message import ResponseInput, ResponseOutput
 from .tracing import TracingClient
 
+
 class LiteLLMClient():
 
     def __init__(
@@ -25,6 +26,8 @@ class LiteLLMClient():
 
         # Drop unsupported params by provider
         litellm.drop_params = True
+
+        litellm.callbacks = ['langfuse_otel']
 
     @observe(as_type="generation")
     def complete(
@@ -78,10 +81,14 @@ class LiteLLMClient():
             **kwargs
         )
 
+        content = ""
         async for chunk in response:
             reply = chunk.choices[0].delta.content
             if reply:
+                content += reply
                 yield reply
+        
+        # TODO: Custom callback https://docs.litellm.ai/docs/observability/custom_callback#custom-callback-to-track-costs-for-streaming--non-streaming
 
     @observe(as_type='generation')
     def batch_complete(

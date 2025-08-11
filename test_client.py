@@ -37,7 +37,8 @@ async def chat_loop(client: LiteLLMClient):
             metadata = {
                 "session_id": session_id,    
             },
-            user = user_id
+            user = user_id,
+            session_id=session_id
         ):
             assistant_message += chunk
             print(chunk, end="", flush=True)
@@ -124,6 +125,6 @@ if __name__ == "__main__":
         tracing_client=tracing_client
     )
 
-    # asyncio.run(chat_loop(client))
+    asyncio.run(chat_loop(client))
     # completion_test(client)
-    batch_completion_test(client)
+    # batch_completion_test(client)
