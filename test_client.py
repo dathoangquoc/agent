@@ -34,10 +34,7 @@ async def chat_loop(client: LiteLLMClient):
         async for chunk in client.stream(
             messages=messages,
             max_tokens = 10000,
-            metadata = {
-                "session_id": session_id,    
-            },
-            user = user_id,
+            user_id= user_id,
             session_id=session_id
         ):
             assistant_message += chunk
@@ -61,9 +58,9 @@ def completion_test(client: LiteLLMClient):
     response = client.complete(
         messages=messages,
         debug=True,
-        session_id="1",
-        user_id="1",
-        max_tokens = 10000,
+        session_id="X",
+        user_id="X",
+        max_tokens = 100,
         top_p = 0.3,
         reasoning_effort = 'low',
         temperature = 0.2
@@ -115,16 +112,13 @@ if __name__ == "__main__":
     config = Config.load()
     config.register_custom_model()
     
-    tracing_client = LangfuseClient()
-
     client = LiteLLMClient(
         model=config.MODEL,
         api_key=config.API_KEY,
         base_url=config.BASE_URL,
         custom_llm_provider=config.CUSTOM_LLM_PROVIDER,
-        tracing_client=tracing_client
     )
 
-    asyncio.run(chat_loop(client))
-    # completion_test(client)
+    # asyncio.run(chat_loop(client))
+    completion_test(client)
     # batch_completion_test(client)

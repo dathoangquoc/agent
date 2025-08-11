@@ -7,47 +7,55 @@ from random import randint
 from pydantic import BaseModel
 
 # OpenAI Agent
-
 from agents.extensions.models.litellm_model import LitellmModel
 from agents import (
     Agent, 
     Runner, 
     function_tool,
     set_tracing_disabled,
-    GuardrailFunctionOutput,
-    input_guardrail,
-    RunContextWrapper,
-    TResponseInputItem,
-    InputGuardrailTripwireTriggered
 )
 
-from mem0 import Memory
+from .config import Config
+from .memory import MemoryClient
 
-memory = Memory()
 
-@function_tool
-def search_memories(message: str, user_id: str) -> str:
-    """Search for user memories
+class ChatWithMemory:
+    def __init__(self):
+        self.memory_client = MemoryClient()
+        self.starting_agent = Agent(
+            name="Main Agent",
+            instructions="Recall from memory facts about the user to answer query",
+            model=LitellmModel(
+                model=Config.MODEL,
+                base_url=Config.BASE_URL,
+                api_key=Config.API_KEY,
+            ),
+            tools=[self.search_memory]
+        )
+    
+    # Agent Tools
+    @function_tool
+    def search_memory(self, query: str, user_id: str):
+        """
+        Search for user memories
 
-    Args:
-        message: user's message
-        user_id: user ID
-    """
-    relevant_memories = memory.search(message, user_id, limit=3)
-    formatted_memories = "\n".join([f"{entry['memory']}" for entry in relevant_memories["results"]])
+        Args:
+            query: the search query
+            user_id: user ID
+        """
+        
+        relevant_memories=self.memory_client.search_memory(
+            query=query,
+            user_id=user_id
+        )
 
-    return formatted_memories
+        formatted_memories="\n".join([f"{entry['memory']}" for entry in relevant_memories["results"]])
+        return formatted_memories
 
-# Agents
+    async def run(self, messages):
+        result = await Runner.run(
+            starting_agent=self.starting_agent,
+            input=[messages]
+        )
 
-model = LitellmModel(model=f"openai/{MODEL_NAME}", base_url=BASE_URL, api_key=API_KEY)
-set_tracing_disabled(True)
-
-### Main Agent
-
-main_agent = Agent(
-    name="Main Agent",
-    instructions="You are a helpful AI",
-    model=model,
-    tools=[search_memories],
-)
+        print(result)

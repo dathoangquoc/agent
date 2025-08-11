@@ -1,5 +1,8 @@
 import os
 import litellm
+from yaml import safe_load
+
+from pydantic_settings import BaseSettings
 
 class Config:
     MODEL: str
@@ -43,3 +46,37 @@ class Config:
                 "output_cost_per_token": 0.00000000126,
             }
         })
+
+
+"""1. ModelConfig():
+    provider 
+....
+
+
+
+config -> load() -> ModelConfig instances 
+
+
+
+2. ModelManager():
+    register(model_config):
+
+    get()"""
+
+with open('config.yml', 'r') as f:
+    base_cfg = safe_load(f)
+
+class LiteLLMConfig(BaseSettings):
+    model: str
+    api_key: str
+    base_url: str
+    custom_llm_provider: str = None
+
+class Mem0Config(BaseSettings):
+    pass
+
+# Instantiate
+
+litellm_cfg = LiteLLMConfig(
+    model=base_cfg['']
+)
