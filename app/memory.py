@@ -1,4 +1,7 @@
 from mem0 import Memory
+from agents import function_tool
+from message import Message
+
 
 config = config = {
     "vector_store": {
@@ -28,35 +31,29 @@ config = config = {
     },
 }
 
+memory = Memory.from_config(config)
 
-class MemoryClient:
-    def __init__(self):
-        self.client = Memory.from_config(config) 
+def add_memory(messages, user_id):
+    """Save a conversation session to memory"""
 
-    def add_memory(self, messages, user_id):
-        """Save a conversation session to memory"""
+    return memory.add(
+        messages=messages,
+        user_id=user_id
+    )
 
-        return self.client.add(
-            messages=messages,
-            user_id=user_id
-        )
-
-    def search_memory(self, query, user_id):
-        """Retrieve a memory based on query"""
-        
-        return self.client.search(
-            query=query,
-            user_id=user_id
-        )
+# @function_tool
+def search_memory(query, user_id):
+    """Retrieve a memory based on query"""
+    return memory.search(
+        query=query,
+        user_id=user_id
+    )
 
 if __name__ == "__main__":
-    client = MemoryClient()
-    messages = [
-        {
-            "role": "user",
-            "content": "I'm from Berlin"
-        }   
-    ]
-
-    print("Added: ", client.add_memory(messages, "1"))
-    print("Found: ", client.search_memory("Where am I from?", user_id="1"))
+    new = add_memory(
+        messages=[Message(content="I'm from Berline", role='user')],
+        user_id='John'
+    )
+    print(f"Added: {new}")
+    result = search_memory("What's special about Berlin?", 'John')
+    print(f"Found {result}")

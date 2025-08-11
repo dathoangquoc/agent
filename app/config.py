@@ -77,6 +77,6 @@ class Mem0Config(BaseSettings):
 
 # Instantiate
 
-litellm_cfg = LiteLLMConfig(
-    model=base_cfg['']
-)
+# litellm_cfg = LiteLLMConfig(
+#     model=base_cfg['']
+# )

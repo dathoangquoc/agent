@@ -1,61 +1,65 @@
-import os
-import asyncio
-from dataclasses import dataclass
-from random import randint
-
-# Pydantic
-from pydantic import BaseModel
+from uuid import uuid4
 
 # OpenAI Agent
 from agents.extensions.models.litellm_model import LitellmModel
 from agents import (
     Agent, 
     Runner, 
-    function_tool,
     set_tracing_disabled,
 )
 
-from .config import Config
-from .memory import MemoryClient
+from .memory import add_memory, search_memory
+from .message import Message
 
-
+# TODO: trace with langfuse
 class ChatWithMemory:
-    def __init__(self):
-        self.memory_client = MemoryClient()
+    def __init__(self, model, base_url, api_key, user_id: str):
+        self.user_id = user_id
         self.starting_agent = Agent(
             name="Main Agent",
-            instructions="Recall from memory facts about the user to answer query",
+            instructions="You are a helpful AI",
             model=LitellmModel(
-                model=Config.MODEL,
-                base_url=Config.BASE_URL,
-                api_key=Config.API_KEY,
+                model=model,
+                base_url=base_url,
+                api_key=api_key,
             ),
-            tools=[self.search_memory]
+            tools=[search_memory],
         )
+        set_tracing_disabled(True)
     
-    # Agent Tools
-    @function_tool
-    def search_memory(self, query: str, user_id: str):
+    async def start_chat_loop(self):
         """
-        Search for user memories
+        Start a chat loop with user_id, auto session_id
 
-        Args:
-            query: the search query
-            user_id: user ID
+        chat: Runner.run()        
+
+        chat ends -> add(messages)
+
         """
+        messages = []
+        session_id = uuid4()
         
-        relevant_memories=self.memory_client.search_memory(
-            query=query,
-            user_id=user_id
+        while True:
+            print("[User]: ")
+            message = Message(
+                content=input(),
+                role="user"
+            )
+
+            if message["content"] in ["q", "quit", "exit"]:
+                break
+            else:
+                messages.append(message)
+
+            result = await Runner.run(
+                starting_agent=self.starting_agent,
+                input=messages,
+            )
+
+            print(result.final_output)
+
+        # Save session to memory after ending
+        add_memory(
+            messages=messages,
+            user_id=self.user_id
         )
-
-        formatted_memories="\n".join([f"{entry['memory']}" for entry in relevant_memories["results"]])
-        return formatted_memories
-
-    async def run(self, messages):
-        result = await Runner.run(
-            starting_agent=self.starting_agent,
-            input=[messages]
-        )
-
-        print(result)
