@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Required, Optional, Any
 
+from litellm.integrations.custom_logger import CustomLogger
+
 from langfuse import get_client
 
 class TracingClient(ABC):
