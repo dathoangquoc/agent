@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from app.config import Config    
 from app.agent import ChatWithMemory
+from app.memory import MemoryClient
 
 ENV_PATH = "./.env.local"
         
@@ -16,22 +17,15 @@ if __name__ == "__main__":
 
     config = Config.load()
     config.register_custom_model()
-    
-    # tracing_client = LangfuseClient()
 
-    # client = LiteLLMClient(
-    #     model=config.MODEL,
-    #     api_key=config.API_KEY,
-    #     base_url=config.BASE_URL,
-    #     custom_llm_provider=config.CUSTOM_LLM_PROVIDER,
-    #     tracing_client=tracing_client
-    # )
+    memory_client = MemoryClient()
 
     chat_client = ChatWithMemory(
         user_id="John",
         model=f"ollama_chat/{config.MODEL}",
         base_url=config.BASE_URL,
-        api_key=config.API_KEY
+        api_key=config.API_KEY,
+        memory_client=memory_client
     )
-    asyncio.run(chat_client.start_chat_loop())
+    asyncio.run(chat_client.start_chat_async())
     

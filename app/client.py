@@ -1,8 +1,7 @@
-from typing import List, TypedDict, AsyncGenerator
+from typing import List, AsyncGenerator
 
 import litellm
 from litellm import completion, acompletion, batch_completion
-from langfuse import get_client
 
 from .message import ResponseInput, ResponseOutput
 
@@ -55,6 +54,7 @@ class LiteLLMClient():
 
         return output_content
 
+    # TODO: fix session_id 
     async def stream(
         self, 
         messages: List[ResponseInput],
@@ -83,8 +83,6 @@ class LiteLLMClient():
                 content += reply
                 yield reply
         
-        # TODO: Custom callback https://docs.litellm.ai/docs/observability/custom_callback#custom-callback-to-track-costs-for-streaming--non-streaming
-
     def batch_complete(
         self,
         messages: List[List[ResponseInput]],

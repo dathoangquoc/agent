@@ -5,16 +5,21 @@ from agents.extensions.models.litellm_model import LitellmModel
 from agents import (
     Agent, 
     Runner, 
+    function_tool,
     set_tracing_disabled,
 )
 
-from .memory import add_memory, search_memory
+from openai.types.responses import ResponseTextDeltaEvent
+
+from .memory import MemoryClient
 from .message import Message
+
 
 # TODO: trace with langfuse
 class ChatWithMemory:
-    def __init__(self, model, base_url, api_key, user_id: str):
+    def __init__(self, model, base_url, api_key, user_id: str, memory_client: MemoryClient):
         self.user_id = user_id
+        self.memory_client = memory_client
         self.starting_agent = Agent(
             name="Main Agent",
             instructions="You are a helpful AI",
@@ -23,18 +28,21 @@ class ChatWithMemory:
                 base_url=base_url,
                 api_key=api_key,
             ),
-            tools=[search_memory],
+            tools=[self.search_memory],
         )
         set_tracing_disabled(True)
     
-    async def start_chat_loop(self):
+    @function_tool
+    def search_memory(self, query, user_id) -> str:
         """
-        Start a chat loop with user_id, auto session_id
+        Retrieve a memory based on query and user_id
+        """
+        return self.memory_client.search_memory(query, user_id)
 
-        chat: Runner.run()        
 
-        chat ends -> add(messages)
-
+    async def start_chat_async(self):
+        """
+        Start a chat loop
         """
         messages = []
         session_id = uuid4()
@@ -51,15 +59,23 @@ class ChatWithMemory:
             else:
                 messages.append(message)
 
-            result = await Runner.run(
-                starting_agent=self.starting_agent,
-                input=messages,
+            result = Runner.run_streamed(
+                self.starting_agent,
+                messages,
             )
-
-            print(result.final_output)
+            async for event in result.stream_events():
+                if event.type == 'raw_response_event' and isinstance(event.data, ResponseTextDeltaEvent):
+                    print(event.data.delta, end="", flush=True)
+            print("\n")
 
         # Save session to memory after ending
-        add_memory(
+        self.memory_client.add_memory(
             messages=messages,
             user_id=self.user_id
         )
+    
+    def mock_chat(prev_dialog: str, next_dialog: str):
+        """
+        Simulate 2 distinct dialog sessions of 1 user 
+        """
+        pass
