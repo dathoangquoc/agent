@@ -3,9 +3,11 @@ import asyncio
 
 from dotenv import load_dotenv
 
+from agents import enable_verbose_stdout_logging
+
 from app.config import Config    
 from app.agent import ChatWithMemory
-from app.memory import MemoryClient
+
 
 ENV_PATH = "./.env.local"
         
@@ -18,14 +20,14 @@ if __name__ == "__main__":
     config = Config.load()
     config.register_custom_model()
 
-    memory_client = MemoryClient()
-
     chat_client = ChatWithMemory(
         user_id="John",
         model=f"ollama_chat/{config.MODEL}",
         base_url=config.BASE_URL,
         api_key=config.API_KEY,
-        memory_client=memory_client
     )
+
+
+    enable_verbose_stdout_logging()
     asyncio.run(chat_client.start_chat_async())
     

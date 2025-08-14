@@ -1,11 +1,10 @@
-from logging import getLogger
-
 from mem0 import Memory
+from agents import function_tool
 
 from .message import Message
 
 
-config = config = {
+config = {
     "vector_store": {
         "provider": "qdrant",
         "config": {
@@ -33,32 +32,23 @@ config = config = {
     },
 }
 
-class MemoryClient:
-    def __init__(self):
-        self.memory = Memory.from_config(config)
+memory_client = Memory.from_config(config)
 
-    def add_memory(self, messages, user_id):
-        """
-        Save a conversation session to memory
-        """
+# TODO: need a way to pass in user_id
+@function_tool
+def search_memory(query: str, user_id: str) -> str:
+    """
+    Retrieve a memory based on query and user_id.
+    Parameters:
+      - query: free-text search string
+      - user_id: who to search memories for
+    Returns:
+      A dict with search matches.
+    """
+    return memory_client.search(query, user_id)
 
-        return self.memory.add(
-            messages=messages,
-            user_id=user_id
-        )
-
-    def search_memory(self, query, user_id):
-        """
-        Retrieve a memory based on query
-        """
-        
-        return self.memory.search(
-            query=query,
-            user_id=user_id
-        )
-
+# Example Usage
 if __name__ == "__main__":
-    memory_client = MemoryClient()
     new = memory_client.add_memory(
         messages=[Message(content="I'm from Berline", role='user')],
         user_id='John'
