@@ -45,14 +45,14 @@ def search_memory(query: str, user_id: str) -> str:
     Returns:
       A dict with search matches.
     """
-    return memory_client.search(query, user_id)
+    return memory_client.search(query=query, user_id=user_id)
 
 # Example Usage
 if __name__ == "__main__":
-    new = memory_client.add_memory(
-        messages=[Message(content="I'm from Berline", role='user')],
+    new = memory_client.add(
+        messages=[Message(content="I'm from Berlin", role='user')],
         user_id='John'
     )
     print(f"Added: {new}")
-    result = memory_client.search_memory("What's special about Berlin?", 'John')
+    result = memory_client.search(query="What's special about Berlin?", user_id='John')
     print(f"Found {result}")
