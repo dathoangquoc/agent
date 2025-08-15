@@ -6,8 +6,61 @@ from agents import function_tool
 from .message import Message
 from .config import Mem0Config
 
-cfg_path = os.path.join(os.path.dirname(__file__), "..", "config", "mem0.yaml")
-mem0_cfg = Mem0Config()
+# cfg_path = os.path.join(os.path.dirname(__file__), "..", "config", "mem0.yaml")
+# mem0_cfg = Mem0Config()
+mem0_cfg = {
+
+"vector_store": {
+
+"provider": "qdrant",
+
+"config": {
+
+"collection_name": "test",
+
+"host": "localhost",
+
+"port": 6333,
+
+"embedding_model_dims": 1024,
+
+},
+
+},
+
+"llm": {
+
+"provider": "ollama",
+
+"config": {
+
+"model": "gemma3:4b",
+
+"temperature": 0,
+
+"max_tokens": 2000,
+
+"ollama_base_url": "http://localhost:11434",
+
+},
+
+},
+
+"embedder": {
+
+"provider": "ollama",
+
+"config": {
+
+"model": "snowflake-arctic-embed2",
+
+"ollama_base_url": "http://localhost:11434",
+
+},
+
+},
+
+}
 memory_client = Memory.from_config(mem0_cfg)
 
 # TODO: need a way to pass in user_id

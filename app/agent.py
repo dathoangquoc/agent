@@ -29,7 +29,7 @@ class ChatWithMemory:
             instructions="You are a helpful AI, answer any queries when you can. If the user ask about previous interactions, use available tool",
             model=LitellmModel(
                 model=model,
-                base_url=base_url,
+                # base_url=base_url,
                 api_key=api_key,
             ),
             tools=[search_memory],
