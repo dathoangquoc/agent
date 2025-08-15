@@ -48,78 +48,44 @@ class Config:
             }
         })
 
-
-"""1. ModelConfig():
-    provider 
-....
-
-
-
-config -> load() -> ModelConfig instances 
-
-
-
-2. ModelManager():
-    register(model_config):
-
-    get()"""
-
-with open('config.yml', 'r') as f:
-    base_cfg = safe_load(f)
-
 # Component Configs
 class LLMConfig(BaseModel):
     model: str
-    provider: str
     api_key: str
     base_url: str
 
 class EmbedderConfig(BaseModel):
     model: str
-    provider: str
     api_key: str
     base_url: str
     embedding_model_dims: int
 
 class VectorStoreConfig(BaseModel):
-    provider: str
     host: str
     port: int
     collection_name: str
     
 # Service Configs
+class LLM(BaseModel):
+    provider: str
+    config: LLMConfig
 
+class Embedder(BaseModel):
+    provider: str
+    config: EmbedderConfig
+
+class VectorStore(BaseModel):
+    provider: str
+    config: VectorStoreConfig
+
+# Module Configs
 class Mem0Config(BaseSettings):
-    vector_store: VectorStoreConfig
-    llm: LLMConfig
-    embedder: EmbedderConfig
+    vector_store: VectorStore
+    llm: LLM
+    embedder: Embedder
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding='utf-8')
-
-config = {
-    "vector_store": {
-        "provider": "qdrant",
-        "config": {
-            "collection_name": "test",
-            "host": "localhost",
-            "port": 6333,
-            "embedding_model_dims": 1024, 
-        },
-    },
-    "llm": {
-        "provider": "ollama",
-        "config": {
-            "model": "gemma3:4b",
-            "temperature": 0,
-            "max_tokens": 2000,
-            "ollama_base_url": "http://localhost:11434", 
-        },
-    },
-    "embedder": {
-        "provider": "ollama",
-        "config": {
-            "model": "snowflake-arctic-embed2",
-            "ollama_base_url": "http://localhost:11434",
-        },
-    },
-}
+    model_config = SettingsConfigDict(
+        env_file=".env", 
+        env_file_encoding='utf-8',
+        yaml_file="mem0.yaml",
+    )

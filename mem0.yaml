@@ -1,0 +1,21 @@
+vector_store:
+  provider: qdrant
+  config:
+    collection_name: test
+    host: localhost
+    port: 6333
+    embedding_model_dims: 1024
+
+llm:
+  provider: ollama
+  config:
+    model: gemma3:4b
+    temperature: 0.5
+    max_tokens: 10000
+    ollama_base_url: http://localhost:11434
+
+embedder:
+  provider: ollama
+  config:
+    model: snowflake-arctic-embed2
+    ollama_base_url: http://localhost:11434
