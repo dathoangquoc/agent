@@ -7,7 +7,7 @@ from agents import enable_verbose_stdout_logging
 
 from app.config import Config    
 from app.agent import ChatWithMemory
-
+from app.memory import add_mock_memory
 
 ENV_PATH = "./.env.local"
         
@@ -27,6 +27,7 @@ if __name__ == "__main__":
         api_key=config.API_KEY,
     )
 
+    # add_mock_memory()
 
     enable_verbose_stdout_logging()
     asyncio.run(chat_client.start_chat_async())

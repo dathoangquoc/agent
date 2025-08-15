@@ -2,7 +2,8 @@ import os
 import litellm
 from yaml import safe_load
 
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Config:
     MODEL: str
@@ -66,17 +67,59 @@ config -> load() -> ModelConfig instances
 with open('config.yml', 'r') as f:
     base_cfg = safe_load(f)
 
-class LiteLLMConfig(BaseSettings):
+# Component Configs
+class LLMConfig(BaseModel):
     model: str
+    provider: str
     api_key: str
     base_url: str
-    custom_llm_provider: str = None
+
+class EmbedderConfig(BaseModel):
+    model: str
+    provider: str
+    api_key: str
+    base_url: str
+    embedding_model_dims: int
+
+class VectorStoreConfig(BaseModel):
+    provider: str
+    host: str
+    port: int
+    collection_name: str
+    
+# Service Configs
 
 class Mem0Config(BaseSettings):
-    pass
+    vector_store: VectorStoreConfig
+    llm: LLMConfig
+    embedder: EmbedderConfig
 
-# Instantiate
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding='utf-8')
 
-# litellm_cfg = LiteLLMConfig(
-#     model=base_cfg['']
-# )
+config = {
+    "vector_store": {
+        "provider": "qdrant",
+        "config": {
+            "collection_name": "test",
+            "host": "localhost",
+            "port": 6333,
+            "embedding_model_dims": 1024, 
+        },
+    },
+    "llm": {
+        "provider": "ollama",
+        "config": {
+            "model": "gemma3:4b",
+            "temperature": 0,
+            "max_tokens": 2000,
+            "ollama_base_url": "http://localhost:11434", 
+        },
+    },
+    "embedder": {
+        "provider": "ollama",
+        "config": {
+            "model": "snowflake-arctic-embed2",
+            "ollama_base_url": "http://localhost:11434",
+        },
+    },
+}
