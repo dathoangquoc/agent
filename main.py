@@ -1,14 +1,15 @@
 import os
 import asyncio
+from yaml import safe_load
 
 from dotenv import load_dotenv
 
 from agents import enable_verbose_stdout_logging
 
-from app.config import Config, Mem0Config
+from app.config import LiteLLMConfig
 from app.agent import ChatWithMemory
 
-ENV_PATH = "./test.env"
+ENV_PATH = ".test.env"
         
 if __name__ == "__main__":
     if os.path.exists(ENV_PATH):
@@ -16,17 +17,15 @@ if __name__ == "__main__":
     else:
         print("Not found env")
 
-    config = Config.load()
-    config.register_custom_model()
+    litellm_config = LiteLLMConfig()
 
     chat_client = ChatWithMemory(
         user_id="John",
-        model=f"{config.CUSTOM_LLM_PROVIDER}/{config.MODEL}",
-        base_url=config.BASE_URL,
-        api_key=config.API_KEY,
+        model=litellm_config.model,
+        base_url=litellm_config.base_url,
+        api_key=litellm_config.api_key,
     )
 
-    # add_mock_memory()
-
-    enable_verbose_stdout_logging()
+    # For debug
+    # enable_verbose_stdout_logging()
     asyncio.run(chat_client.start_chat_async())

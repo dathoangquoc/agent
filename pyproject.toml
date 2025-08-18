@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.116.1",
+    "google-genai>=1.30.0",
     "langfuse>=3.2.1",
     "litellm>=1.72.6",
     "mem0ai>=0.1.109",

@@ -12,3 +12,10 @@ wheels/
 # Environment variables
 .env*
 *.env
+
+# Logs
+*.log
+logs/
+
+# Configuration files
+*.prod.yaml

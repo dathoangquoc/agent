@@ -13,7 +13,7 @@ from openai.types.responses import ResponseTextDeltaEvent
 
 import litellm
 
-from .memory import search_memory
+from .memory import add_memory, search_memory
 from .message import Message 
 
 
@@ -32,7 +32,7 @@ class ChatWithMemory:
                 # base_url=base_url,
                 api_key=api_key,
             ),
-            tools=[search_memory],
+            tools=[search_memory, add_memory],
         )
         
     async def start_chat_async(self):

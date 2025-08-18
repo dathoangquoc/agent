@@ -1,7 +1,7 @@
 vector_store:
   provider: qdrant
   config:
-    collection_name: test
+    collection_name: local
     host: localhost
     port: 6333
     embedding_model_dims: 1024

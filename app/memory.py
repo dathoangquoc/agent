@@ -2,66 +2,15 @@ import os
 
 from mem0 import Memory
 from agents import function_tool
+from yaml import safe_load
 
 from .message import Message
 from .config import Mem0Config
 
-# cfg_path = os.path.join(os.path.dirname(__file__), "..", "config", "mem0.yaml")
-# mem0_cfg = Mem0Config()
-mem0_cfg = {
 
-"vector_store": {
-
-"provider": "qdrant",
-
-"config": {
-
-"collection_name": "test",
-
-"host": "localhost",
-
-"port": 6333,
-
-"embedding_model_dims": 1024,
-
-},
-
-},
-
-"llm": {
-
-"provider": "ollama",
-
-"config": {
-
-"model": "gemma3:4b",
-
-"temperature": 0,
-
-"max_tokens": 2000,
-
-"ollama_base_url": "http://localhost:11434",
-
-},
-
-},
-
-"embedder": {
-
-"provider": "ollama",
-
-"config": {
-
-"model": "snowflake-arctic-embed2",
-
-"ollama_base_url": "http://localhost:11434",
-
-},
-
-},
-
-}
-memory_client = Memory.from_config(mem0_cfg)
+with open("./config/mem0.test.yaml", "r") as f:
+    mem0_cfg = safe_load(f)
+    memory_client = Memory.from_config(mem0_cfg)
 
 # TODO: need a way to pass in user_id
 @function_tool
@@ -74,6 +23,17 @@ def search_memory(query: str) -> str:
       A dict with search matches.
     """
     return memory_client.search(query=query, user_id="John")
+
+@function_tool
+def add_memory(messages: list[Message]) -> str:
+    """
+    Add a new memory to the memory store
+    Parameters:
+      - messages: list of messages to add
+    Returns:
+      A dict with the added memory.
+    """
+    return memory_client.add(messages=messages, user_id="John")
 
 def add_mock_memory():
     print("Adding new memory")
