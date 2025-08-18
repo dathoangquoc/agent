@@ -21,7 +21,6 @@ if __name__ == "__main__":
     chat_client = ChatWithMemory(
         user_id="Kajiwara",
         model=litellm_config.model,
-        base_url=litellm_config.base_url,
         api_key=litellm_config.api_key,
     )
 

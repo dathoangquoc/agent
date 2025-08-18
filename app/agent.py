@@ -1,11 +1,8 @@
-from uuid import uuid4
-
 # OpenAI Agent
 from agents.extensions.models.litellm_model import LitellmModel
 from agents import (
     Agent, 
     Runner, 
-    run_demo_loop,
     set_tracing_disabled
 )
 
@@ -17,12 +14,13 @@ import litellm
 from .memory import create_memory_tools
 from app.prompt import MAIN_AGENT_PROMPT
 
+
 # Enable tracing through litellm client
 set_tracing_disabled(True)
 litellm.callbacks = ["langfuse_otel"]
 
 class ChatWithMemory:
-    def __init__(self, model, base_url, api_key, user_id: str):
+    def __init__(self, model, api_key, user_id: str):
         self.user_id = user_id
         self.history = []
 
@@ -33,7 +31,6 @@ class ChatWithMemory:
             instructions=MAIN_AGENT_PROMPT,
             model=LitellmModel(
                 model=model,
-                # base_url=base_url,
                 api_key=api_key,
             ),
             tools=memory_tools,

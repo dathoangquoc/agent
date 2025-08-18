@@ -2,8 +2,6 @@ from mem0 import Memory
 from agents import function_tool
 from yaml import safe_load
 
-from .message import Message
-
 
 with open("./config/mem0.prod.yml", "r") as f:
     mem0_cfg = safe_load(f)
