@@ -17,7 +17,7 @@ def create_memory_tools(chat_instance):
   @function_tool
   def search_memory(query: str) -> str:
       """
-      Retrieve a memory based on query
+      Retrieve a memory about the user based on a query
       Parameters:
         - query: free-text search string
       Returns:
@@ -31,7 +31,7 @@ def create_memory_tools(chat_instance):
   @function_tool
   def add_memory() -> str:
       """
-      Add the current conversation to the memory store whenever you agent learns something useful:
+      Add the current conversation to the memory store whenever you learns something useful:
       - A new user preference is shared
       - A decision or suggestion is made
       - A goal or task is completed
@@ -43,7 +43,7 @@ def create_memory_tools(chat_instance):
       Returns:
         A dict with the added memory.
       """
-      print(f"Adding: {chat_instance.history} to memory for user {chat_instance.user_id}")
+      print(f"Adding: {chat_instance.history} to memory for user [{chat_instance.user_id}]")
       messages = chat_instance.history
       if not messages:
           return "No messages to add to memory."
