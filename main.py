@@ -1,6 +1,5 @@
 import os
 import asyncio
-from yaml import safe_load
 
 from dotenv import load_dotenv
 
@@ -9,7 +8,7 @@ from agents import enable_verbose_stdout_logging
 from app.config import LiteLLMConfig
 from app.agent import ChatWithMemory
 
-ENV_PATH = ".test.env"
+ENV_PATH = ".prod.env"
         
 if __name__ == "__main__":
     if os.path.exists(ENV_PATH):

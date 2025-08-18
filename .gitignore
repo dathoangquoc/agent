@@ -18,4 +18,4 @@ wheels/
 logs/
 
 # Configuration files
-*.prod.yaml
+*.prod.yml

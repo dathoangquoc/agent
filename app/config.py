@@ -10,7 +10,6 @@ class LiteLLMConfig(BaseSettings):
     model: str = Field(..., description="The model to use for LiteLLM")
     base_url: str = Field(..., description="Base URL for the LiteLLM API")
     api_key: str = Field(..., description="API key for LiteLLM access")
-    custom_llm_provider: str = Field("openai", description="Custom LLM provider name")
     
 def register_custom_model():
     litellm.register_model({
