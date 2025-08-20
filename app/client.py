@@ -21,18 +21,22 @@ class LiteLLMClient():
             user_id: str = None, 
             **kwargs
         ) -> ResponseOutput:
-        response = completion(
-            model=self.model, 
-            messages=messages,
-            base_url=self.base_url,
-            api_key=self.api_key,
-            custom_llm_provider=self.custom_llm_provider,
-            metadata={
-                "session_id": session_id,
-                "user_id": user_id
-            }
-            **kwargs
-        )
+        try:
+            response = completion(
+                model=self.model, 
+                messages=messages,
+                base_url=self.base_url,
+                api_key=self.api_key,
+                custom_llm_provider=self.custom_llm_provider,
+                metadata={
+                    "session_id": session_id,
+                    "user_id": user_id
+                }
+                **kwargs
+            )
+        except Exception as e:
+            print(f"Error during completion: {e}")
+            return "Error during completion"
 
         reasoning_content = getattr(response.choices[0].message, "reasoning_content", "")
         output_content = response.choices[0].message.content
@@ -43,7 +47,7 @@ class LiteLLMClient():
 
         return output_content
 
-    # TODO: fix session_id 
+    # TODO: fix session_id w/ older versions of langfuse
     async def stream(
         self, 
         messages: List[ResponseInput],
@@ -51,19 +55,24 @@ class LiteLLMClient():
         user_id: str, 
         **kwargs
     ) -> AsyncGenerator:
-        response = await acompletion(
-            model=self.model,
-            messages=messages,
-            base_url=self.base_url,
-            api_key=self.api_key,
-            custom_llm_provider=self.custom_llm_provider,
-            stream=True,
-            metadata={
-                "session_id": session_id,
-                "user_id": user_id
-            }
-            **kwargs
-        )
+        try:
+            response = await acompletion(
+                model=self.model,
+                messages=messages,
+                base_url=self.base_url,
+                api_key=self.api_key,
+                custom_llm_provider=self.custom_llm_provider,
+                stream=True,
+                metadata={
+                    "session_id": session_id,
+                    "user_id": user_id
+                }
+                **kwargs
+            )
+        except Exception as e:
+            print(f"Error during streaming: {e}")
+            yield "Error during streaming"
+            return
 
         content = ""
         async for chunk in response:
@@ -79,14 +88,18 @@ class LiteLLMClient():
         user_id: str,     
         **kwargs
     ) -> List[ResponseOutput]:
-        responses = batch_completion(
-            model=self.model,
-            messages=messages,
-            base_url=self.base_url,
-            api_key=self.api_key,
-            custom_llm_provider=self.custom_llm_provider,
-            **kwargs
-        )
+        try:
+            responses = batch_completion(
+                model=self.model,
+                messages=messages,
+                base_url=self.base_url,
+                api_key=self.api_key,
+                custom_llm_provider=self.custom_llm_provider,
+                **kwargs
+            )
+        except Exception as e:
+            print(f"Error during batch completion: {e}")
+            return ["Error during batch completion"]
 
         replies = []
         for response in responses: 
