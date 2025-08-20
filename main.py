@@ -19,7 +19,7 @@ if __name__ == "__main__":
     litellm_config = LiteLLMConfig()
 
     chat_client = ChatWithMemory(
-        user_id="Kajiwara",
+        user_id="A",
         model=litellm_config.model,
         api_key=litellm_config.api_key,
     )
