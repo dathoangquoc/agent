@@ -1,28 +1,17 @@
 from typing import List, AsyncGenerator
 
+from dataclasses import dataclass
 import litellm
 from litellm import completion, acompletion, batch_completion
 
 from .message import ResponseInput, ResponseOutput
 
-
+@dataclass
 class LiteLLMClient():
-
-    def __init__(
-            self, 
-            model: str, 
-            api_key: str, 
-            base_url: str, 
-            custom_llm_provider: str = None,
-        ):
-        self.model = model
-        self.api_key = api_key
-        self.base_url = base_url
-        self.custom_llm_provider = custom_llm_provider
-
-        # Drop unsupported params by provider
-        litellm.drop_params = True
-        litellm.callbacks = ['langfuse_otel']
+    model: str
+    api_key: str
+    base_url: str
+    custom_llm_provider: str
 
     def complete(
             self, 

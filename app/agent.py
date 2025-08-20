@@ -8,16 +8,12 @@ from agents import (
 
 from openai.types.responses import ResponseTextDeltaEvent
 
-# Litellm
-import litellm
-
 from .memory import create_memory_tools
 from app.prompt import MAIN_AGENT_PROMPT
 
 
-# Enable tracing through litellm client
+# Disable OpenAI tracing
 set_tracing_disabled(True)
-litellm.callbacks = ["langfuse_otel"]
 
 class ChatWithMemory:
     def __init__(self, model, api_key, user_id: str):

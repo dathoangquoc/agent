@@ -21,9 +21,9 @@ def create_memory_tools(chat_instance):
       Returns:
         A dict with search matches.
       """
-      print(f"Searching memory for query: {query}")
+      # print(f"Searching memory for query: {query}")
       found = memory_client.search(query=query, user_id=chat_instance.user_id)
-      print(f"Found: {found}")
+      # print(f"Found: {found}")
       return found
 
   @function_tool
@@ -41,7 +41,7 @@ def create_memory_tools(chat_instance):
       Returns:
         A dict with the added memory.
       """
-      print(f"Adding: {chat_instance.history} to memory for user [{chat_instance.user_id}]")
+      # print(f"Adding: {chat_instance.history} to memory for user [{chat_instance.user_id}]")
       messages = chat_instance.history
       if not messages:
           return "No messages to add to memory."
@@ -49,7 +49,7 @@ def create_memory_tools(chat_instance):
       # Clear the messages after adding to memory to prevent the same messages from being added again next time
       chat_instance.history = []
 
-      print(f"Added to memory: {found}")
+      # print(f"Added to memory: {found}")
       return found
 
   return [search_memory, add_memory]

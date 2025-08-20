@@ -3,18 +3,23 @@ import asyncio
 
 from dotenv import load_dotenv
 
+import litellm
+
 from agents import enable_verbose_stdout_logging
 
 from app.config import LiteLLMConfig
 from app.agent import ChatWithMemory
 
-ENV_PATH = ".prod.env"
         
 if __name__ == "__main__":
+    ENV_PATH = ".prod.env"
     if os.path.exists(ENV_PATH):
         load_dotenv(ENV_PATH)
     else:
         print("Not found env")
+
+    litellm.drop_params = True
+    litellm.callbacks = ['langfuse_otel']
 
     litellm_config = LiteLLMConfig()
 
@@ -26,4 +31,5 @@ if __name__ == "__main__":
 
     # For debug
     # enable_verbose_stdout_logging()
+    
     asyncio.run(chat_client.start_chat_async())
