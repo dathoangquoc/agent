@@ -45,11 +45,22 @@ def create_memory_tools(chat_instance):
       messages = chat_instance.history
       if not messages:
           return "No messages to add to memory."
-      found = memory_client.add(messages=messages, user_id=chat_instance.user_id)
+      found = memory_client.add(messages=messages, user_id=chat_instance.user_id, run_id=chat_instance.session_id)
       # Clear the messages after adding to memory to prevent the same messages from being added again next time
       chat_instance.history = []
 
       # print(f"Added to memory: {found}")
       return found
+  
+  def get_last_session(query) -> str:
+      """
+      Get the last session of the user
+      Returns:
+        A dict with the last session memory.
+      """
+      # print(f"Getting last session for user [{chat_instance.user_id}]")
+      last_session = memory_client.search(query=query, user_id=chat_instance.user_id, run_id=chat_instance.session_id)
+      # print(f"Last session: {last_session}")
+      return last_session
 
-  return [search_memory, add_memory]
+  return search_memory, add_memory, get_last_session

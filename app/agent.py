@@ -9,27 +9,34 @@ from agents import (
 from openai.types.responses import ResponseTextDeltaEvent
 
 from .memory import create_memory_tools
-from app.prompt import MAIN_AGENT_PROMPT
 
+MEMORY_AGENT_PROMPT = """
+You are a helpful agent with memory capabilities.
+You can search for memories, add new memories related to the user.
+
+If provided with memory of the last session, use it as context for the current conversation.
+"""
 
 # Disable OpenAI tracing
 set_tracing_disabled(True)
 
 class ChatWithMemory:
-    def __init__(self, model, api_key, user_id: str):
+    def __init__(self, model, api_key, user_id: str, session_id: int = 1):
         self.user_id = user_id
+        self.session_id = str(session_id - 1)
         self.history = []
 
-        memory_tools = create_memory_tools(chat_instance=self)
+        search_memory, add_memory, get_last_session = create_memory_tools(chat_instance=self)
+        self.get_last_session = get_last_session
 
         self.starting_agent = Agent(
-            name="Main Agent",
-            instructions=MAIN_AGENT_PROMPT,
+            name="Memory Agent",
+            instructions=MEMORY_AGENT_PROMPT,
             model=LitellmModel(
                 model=model,
                 api_key=api_key,
             ),
-            tools=memory_tools,
+            tools=[search_memory, add_memory],
         )
         
     async def start_chat_async(self):
@@ -37,7 +44,9 @@ class ChatWithMemory:
         Start a chat loop
         """
         try:
-            messages = []
+            messages = [
+                {"role": "system", "content": f"Previous session: {self.get_last_session(query='Any')}"},
+            ]
             while True:
                 user_input = input("You: ")
                 if user_input.lower() in ["exit", "quit", "q"]:
@@ -49,7 +58,7 @@ class ChatWithMemory:
                 messages.append(user_message)
                 self.history.append(user_message)
 
-                result = Runner.run_streamed(self.starting_agent, input=user_input)
+                result = Runner.run_streamed(self.starting_agent, input=messages)
 
                 print("\nAgent: ")
                 async for event in result.stream_events():
