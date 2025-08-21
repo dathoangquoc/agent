@@ -16,7 +16,7 @@ MEMORY_AGENT_PROMPT = """
 You are a helpful agent with memory capabilities.
 You can search for memories, add new memories related to the user.
 
-If provided with memory of the last session, use it as context for the current conversation.
+If provided with memory of the last session, use it as context and continue the conversation.
 """
 
 # Disable OpenAI tracing
