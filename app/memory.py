@@ -52,15 +52,15 @@ def create_memory_tools(chat_instance):
       # print(f"Added to memory: {found}")
       return found
   
-  def get_last_session(query) -> str:
+  def get_last_session() -> str:
       """
       Get the last session of the user
       Returns:
         A dict with the last session memory.
       """
       # print(f"Getting last session for user [{chat_instance.user_id}]")
-      last_session = memory_client.search(query=query, user_id=chat_instance.user_id, run_id=chat_instance.session_id)
-      # print(f"Last session: {last_session}")
+      last_session = memory_client.get_all(user_id=chat_instance.user_id, run_id=chat_instance.session_id)
+      # print(f"Last session (id: {chat_instance.session_id}): {last_session['results'][0]['memory']}")
       return last_session
 
   return search_memory, add_memory, get_last_session

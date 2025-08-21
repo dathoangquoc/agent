@@ -1,4 +1,5 @@
 # OpenAI Agent
+import gc
 from agents.extensions.models.litellm_model import LitellmModel
 from agents import (
     Agent, 
@@ -6,6 +7,7 @@ from agents import (
     set_tracing_disabled
 )
 
+import aiohttp
 from openai.types.responses import ResponseTextDeltaEvent
 
 from .memory import create_memory_tools
@@ -44,8 +46,11 @@ class ChatWithMemory:
         Start a chat loop
         """
         try:
+            prev_session = self.get_last_session()
+            if prev_session['results'][0]['memory']:
+                prev_memory = prev_session['results'][0]['memory']
             messages = [
-                {"role": "system", "content": f"Previous session: {self.get_last_session(query='Any')}"},
+                {"content": f"Previous session: {prev_memory}", "role": "system"}
             ]
             while True:
                 user_input = input("You: ")
@@ -53,7 +58,7 @@ class ChatWithMemory:
                     print("Exiting chat...")
                     break
 
-                user_message = {"role": "user", "content": user_input}
+                user_message = {"content": user_input, "role": "user"}
 
                 messages.append(user_message)
                 self.history.append(user_message)
@@ -65,17 +70,21 @@ class ChatWithMemory:
                     if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
                         print(event.data.delta, end="", flush=True)
                 
-                response_message = {"role": "assistant", "content": result.final_output}
+                response_message = {"content": result.final_output, "role": "assistant"}
 
                 messages.append(response_message)
                 self.history.append(response_message)
                 
                 print("-------------------------------------------------------")
         finally:
-            # BUG: 
-            # Unclosed client session
-            # client_session: <aiohttp.client.ClientSession object at 0x7a2981fe46b0>
-            pass
+            await self.cleanup()
+
+    async def cleanup(self):
+        """Clean up all unclosed aiohttp sessions"""
+        for obj in gc.get_objects():
+            if isinstance(obj, aiohttp.ClientSession) and not obj.closed:
+                await obj.close()
+            
 
     def mock_chat(prev_dialog: str, next_dialog: str):
         """

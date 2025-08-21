@@ -25,12 +25,12 @@ if __name__ == "__main__":
 
     chat_client = ChatWithMemory(
         user_id="A",
-        session_id=3,
+        session_id=2,
         model=litellm_config.model,
         api_key=litellm_config.api_key,
     )
 
     # For debug
-    # enable_verbose_stdout_logging()
+    enable_verbose_stdout_logging()
     
     asyncio.run(chat_client.start_chat_async())
