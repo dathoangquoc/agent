@@ -47,11 +47,17 @@ class ChatWithMemory:
         """
         try:
             prev_session = self.get_last_session()
-            if prev_session['results'][0]['memory']:
-                prev_memory = prev_session['results'][0]['memory']
-            messages = [
-                {"content": f"Previous session: {prev_memory}", "role": "system"}
-            ]
+            prev_memory = None
+            if prev_session and prev_session['results']:
+                if prev_session['results'][0]['memory']:
+                    prev_memory = prev_session['results'][0]['memory']
+
+            messages = []
+            if prev_memory:
+                messages = [
+                    {"content": f"Previous session: {prev_memory}", "role": "system"}
+                ]
+            
             while True:
                 user_input = input("You: ")
                 if user_input.lower() in ["exit", "quit", "q"]:
