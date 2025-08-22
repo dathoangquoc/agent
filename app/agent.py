@@ -1,5 +1,6 @@
-# OpenAI Agent
 import gc
+import aiohttp
+
 from agents.extensions.models.litellm_model import LitellmModel
 from agents import (
     Agent, 
@@ -7,10 +8,10 @@ from agents import (
     set_tracing_disabled
 )
 
-import aiohttp
 from openai.types.responses import ResponseTextDeltaEvent
 
 from .memory import create_memory_tools
+
 
 MEMORY_AGENT_PROMPT = """
 You are a helpful agent with memory capabilities.

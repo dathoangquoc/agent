@@ -11,8 +11,9 @@ class Prompt:
     role: Optional[str] = None
     examples: Optional[str] = None
     output_format: Optional[str] = None
+    data: Optional[str] = None
         
-    _order: Iterable[str] = ('role', 'task', 'instructions', 'context', 'examples', 'output_format')
+    _order: Iterable[str] = ('role', 'task', 'instructions', 'context', 'examples', 'output_format', 'data')
 
     def __str__(self) -> str:
         parts = []
@@ -34,7 +35,9 @@ MAIN_AGENT_PROMPT = Prompt(
     role="You are a helpful assistant.",
     examples="For example, if the user asks about the weather, you can provide current weather information.",
     output_format="Please respond in a clear and concise manner.",
+    data="Here is the data: {data}"
 )
 
 if __name__ == "__main__":
-    print(MAIN_AGENT_PROMPT)
+    data = "WORKING"
+    print(MAIN_AGENT_PROMPT.parse_variables(data=data))
