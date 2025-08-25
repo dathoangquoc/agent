@@ -4,9 +4,9 @@ import asyncio
 
 from dotenv import load_dotenv
 
-from app.client import LiteLLMClient
-from app.config import Config    
-from app.tracing import LangfuseClient
+from src.client import LiteLLMClient
+from src.config import Config    
+from src.tracing.tracing import LangfuseClient
 
 ENV_PATH = "./.env.local"
 

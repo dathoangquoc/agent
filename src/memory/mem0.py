@@ -21,9 +21,8 @@ def create_memory_tools(chat_instance):
       Returns:
         A dict with search matches.
       """
-      # print(f"Searching memory for query: {query}")
+
       found = memory_client.search(query=query, user_id=chat_instance.user_id)
-      # print(f"Found: {found}")
       return found
 
   @function_tool
@@ -41,7 +40,6 @@ def create_memory_tools(chat_instance):
       Returns:
         A dict with the added memory.
       """
-      # print(f"Adding: {chat_instance.history} to memory for user [{chat_instance.user_id}]")
       messages = chat_instance.history
       if not messages:
           return "No messages to add to memory."
@@ -49,7 +47,6 @@ def create_memory_tools(chat_instance):
       # Clear the messages after adding to memory to prevent the same messages from being added again next time
       chat_instance.history = []
 
-      # print(f"Added to memory: {found}")
       return found
   
   def get_last_session() -> str:
@@ -58,9 +55,7 @@ def create_memory_tools(chat_instance):
       Returns:
         A dict with the last session memory.
       """
-      # print(f"Getting last session for user [{chat_instance.user_id}]")
       last_session = memory_client.get_all(user_id=chat_instance.user_id, run_id=chat_instance.session_id)
-      # print(f"Last session (id: {chat_instance.session_id}): {last_session['results'][0]['memory']}")
       return last_session
 
   return search_memory, add_memory, get_last_session

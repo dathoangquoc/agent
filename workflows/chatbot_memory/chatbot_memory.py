@@ -10,15 +10,19 @@ from agents import (
 
 from openai.types.responses import ResponseTextDeltaEvent
 
-from .memory import create_memory_tools
+from src.memory.mem0 import create_memory_tools
+from src.prompt import Prompt
 
 
-MEMORY_AGENT_PROMPT = """
-You are a helpful agent with memory capabilities.
-You can search for memories, add new memories related to the user.
-
-If provided with memory of the last session, use it as context and continue the conversation.
-"""
+MAIN_AGENT_PROMPT = Prompt(
+    task="Your task is to assist the user with their queries and provide helpful responses.",
+    instructions="You should use any tools necessary to complete the task.",
+    context="You can answer questions, provide explanations, and assist with various tasks.",
+    role="You are a helpful assistant.",
+    examples="For example, if the user asks about the weather, you can provide current weather information.",
+    output_format="Please respond in a clear and concise manner.",
+    data="Here is the data: {data}"
+)
 
 # Disable OpenAI tracing
 set_tracing_disabled(True)
@@ -34,7 +38,7 @@ class ChatWithMemory:
 
         self.starting_agent = Agent(
             name="Memory Agent",
-            instructions=MEMORY_AGENT_PROMPT,
+            instructions=MAIN_AGENT_PROMPT,
             model=LitellmModel(
                 model=model,
                 api_key=api_key,
@@ -92,9 +96,3 @@ class ChatWithMemory:
             if isinstance(obj, aiohttp.ClientSession) and not obj.closed:
                 await obj.close()
             
-
-    def mock_chat(prev_dialog: str, next_dialog: str):
-        """
-        Simulate 2 distinct dialog sessions of 1 user 
-        """
-        pass

@@ -7,8 +7,8 @@ import litellm
 
 from agents import enable_verbose_stdout_logging
 
-from app.config import LiteLLMConfig
-from app.agent import ChatWithMemory
+from src.config import LiteLLMConfig
+from .chatbot_memory import ChatWithMemory
 
         
 if __name__ == "__main__":
