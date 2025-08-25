@@ -21,7 +21,6 @@ MAIN_AGENT_PROMPT = Prompt(
     role="You are a helpful assistant.",
     examples="For example, if the user asks about the weather, you can provide current weather information.",
     output_format="Please respond in a clear and concise manner.",
-    data="Here is the data: {data}"
 )
 
 # Disable OpenAI tracing
