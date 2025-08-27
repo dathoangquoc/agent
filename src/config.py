@@ -49,3 +49,6 @@ class Mem0Config(BaseSettings):
     vector_store: VectorStore
     llm: LLM
     embedder: Embedder
+
+with open("./configs/mem0.prod.yml", "r") as f:
+    mem0_cfg = safe_load(f)

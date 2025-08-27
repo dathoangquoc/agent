@@ -20,19 +20,19 @@ MAIN_AGENT_PROMPT = Prompt(
     context="You can answer questions, provide explanations, and assist with various tasks.",
     role="You are a helpful assistant.",
     examples="For example, if the user asks about the weather, you can provide current weather information.",
-    output_format="Please respond in a clear and concise manner.",
+    output="Please respond in a clear and concise manner.",
 )
 
 # Disable OpenAI tracing
 set_tracing_disabled(True)
 
 class ChatWithMemory:
-    def __init__(self, model, api_key, user_id: str, session_id: int = 1):
+    def __init__(self, memory_client, model, api_key, user_id: str, session_id: int = 1):
         self.user_id = user_id
         self.session_id = str(session_id - 1)
         self.history = []
 
-        search_memory, add_memory, get_last_session = create_memory_tools(chat_instance=self)
+        search_memory, add_memory, get_last_session = create_memory_tools(chat_instance=self, memory_client=memory_client)
         self.get_last_session = get_last_session
 
         self.starting_agent = Agent(

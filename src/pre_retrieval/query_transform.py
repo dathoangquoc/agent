@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from agents import Agent, Runner
 from agents.extensions.models.litellm_model import LitellmModel
 
-from .prompts import INITIAL_AGENT_PROMPT, QUERY_REWRITE_PROMPT
+from .prompts import QUERY_TRANSFORM_ORCHESTRATOR_PROMPT, QUERY_REWRITE_PROMPT, MULTI_QUERY_GENERATION_PROMPT, HYPOTHETICAL_DOCUMENT_EMBEDDING_PROMPT, EXTRACT_METADATA_PROMPT
 
-@dataclass
+
 class QueryTransformer:
     """
     Input: User query
@@ -18,24 +18,66 @@ class QueryTransformer:
     """
     pass
 
+    def __init__(self, model: str, api_key: str):
+        self.llm = LitellmModel(
+            model=model,
+            api_key=api_key,
+        )
 
+        self.rewrite_agent = Agent(
+            name="Query Rewrite Agent",
+            instructions=str(QUERY_REWRITE_PROMPT),
+            model=self.llm,
+        )
 
-rewrite_agent = Agent(
-    name="Query Rewrite Agent",
-    instructions=QUERY_REWRITE_PROMPT,
-    model=LitellmModel(
-        model="your-model-name",
-        api_key="your-api-key",
-    ),
-)
+        self.multi_query_agent = Agent(
+            name="Multi Query Generation Agent",
+            instructions=str(MULTI_QUERY_GENERATION_PROMPT),
+            model=self.llm
+        )
 
-hyde_agent = Agent()
+        self.hyde_agent = Agent(
+            name="HyDE Agent",
+            instructions=str(HYPOTHETICAL_DOCUMENT_EMBEDDING_PROMPT),
+            model=self.llm
+        )
 
+        self.extract_metadata_agent = Agent(
+            name="Extract Metadata Agent",
+            instructions=str(EXTRACT_METADATA_PROMPT),
+            model=self.llm
+        )
 
+        self.orchestrator = Agent(
+            name="Orchestrator",
+            instructions=str(QUERY_TRANSFORM_ORCHESTRATOR_PROMPT),
+            tools=[
+                self.rewrite_agent.as_tool(
+                    tool_name=None,
+                    tool_description=None
+                ),
+                self.multi_query_agent.as_tool(
+                    tool_name=None,
+                    tool_description=None
+                ),
+                self.hyde_agent.as_tool(
+                    tool_name=None,
+                    tool_description=None
+                ),
+                self.extract_metadata_agent.as_tool(
+                    tool_name=None,
+                    tool_description=None
+                )
+            ],
+            model=self.llm
+        )
 
-
-initial_agent = Agent(
-    name="Initial Agent",
-    instructions=INITIAL_AGENT_PROMPT,
-    handoffs=[rewrite_agent]
-)
+    async def process_query(self, query: str):
+        """
+        Let an Orchestrator Agent decides how to handle the query
+        """
+        result = await Runner.run(
+            starting_agent=self.orchestrator,
+            input=query
+        )
+        return result

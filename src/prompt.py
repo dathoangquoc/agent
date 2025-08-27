@@ -10,10 +10,10 @@ class Prompt:
     context: Optional[str] = None
     role: Optional[str] = None
     examples: Optional[str] = None
-    output_format: Optional[str] = None
+    output: Optional[str] = None
     data: Optional[str] = None
         
-    _order: Iterable[str] = ('role', 'task', 'instructions', 'context', 'examples', 'output_format', 'data')
+    _order: Iterable[str] = ('role', 'task', 'instructions', 'context', 'examples', 'output', 'data')
 
     def __str__(self) -> str:
         parts = []

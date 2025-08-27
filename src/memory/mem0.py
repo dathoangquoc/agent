@@ -1,13 +1,10 @@
-from mem0 import Memory
-from agents import function_tool
 from yaml import safe_load
 
+from mem0 import Memory
+from agents import function_tool
 
-with open("./config/mem0.prod.yml", "r") as f:
-    mem0_cfg = safe_load(f)
-    memory_client = Memory.from_config(mem0_cfg)
 
-def create_memory_tools(chat_instance):
+def create_memory_tools(chat_instance, memory_client):
   """
   Create memory tools for the agent
   """

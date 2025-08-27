@@ -1,17 +1,19 @@
 import os
+import sys
 import asyncio
-
 from dotenv import load_dotenv
 
 import litellm
-
 from agents import enable_verbose_stdout_logging
+from mem0 import Memory
 
-from src.config import LiteLLMConfig
+from src.config import LiteLLMConfig, mem0_cfg
 from .chatbot_memory import ChatWithMemory
 
-        
+
 if __name__ == "__main__":
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
     ENV_PATH = ".prod.env"
     if os.path.exists(ENV_PATH):
         load_dotenv(ENV_PATH)
@@ -23,6 +25,7 @@ if __name__ == "__main__":
 
     litellm_config = LiteLLMConfig()
 
+    memory_client = Memory.from_config(mem0_cfg)
     chat_client = ChatWithMemory(
         user_id="A",
         session_id=1,
