@@ -18,7 +18,7 @@ if __name__ == "__main__":
         api_key=os.environ['API_KEY']
     )
     
-    query = "What is Nvidia biggest innovation?"
+    query = "What is Nvidia biggest AI-related innovation?"
     transformed = asyncio.run(transformer.process_query(query))
     print(transformed)
 

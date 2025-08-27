@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from agents import Agent, Runner
 from agents.extensions.models.litellm_model import LitellmModel
 
@@ -69,7 +67,7 @@ class QueryTransformer:
                     tool_description=None
                 )
             ],
-            model=self.llm
+            model=self.llm,
         )
 
     async def process_query(self, query: str):
@@ -80,4 +78,10 @@ class QueryTransformer:
             starting_agent=self.orchestrator,
             input=query
         )
-        return result
+
+        items = []
+        for item in result.new_items:
+            if hasattr(item.raw_item, 'content'):
+                items.append(str(item.raw_item.content[0].text))
+
+        return '\n\n'.join(items)
