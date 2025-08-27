@@ -16,7 +16,6 @@ Else if the message is a query:
 - If the domain has strong facets present or inferable (time, product, version, locale, customer IDs, service tier). -> Extract Metadata Agent
 - If coverage/recall risk is high (broad topic, many synonyms, cross-team nomenclature, multi-lingual surface forms). -> Multi Query Agent
 - If the query is short/abstract or conceptual and likely to benefit from dense semantic anchoring. -> HyDE Agent
-- Else ask the user to clarify if unsure.
 """
 ) 
 

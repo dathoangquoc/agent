@@ -1,4 +1,4 @@
-from agents import Agent, Runner
+from agents import Agent, Runner, ModelSettings
 from agents.extensions.models.litellm_model import LitellmModel
 
 from .prompts import QUERY_TRANSFORM_ORCHESTRATOR_PROMPT, QUERY_REWRITE_PROMPT, MULTI_QUERY_GENERATION_PROMPT, HYPOTHETICAL_DOCUMENT_EMBEDDING_PROMPT, EXTRACT_METADATA_PROMPT
@@ -68,6 +68,7 @@ class QueryTransformer:
                 )
             ],
             model=self.llm,
+            model_settings=ModelSettings(tool_choice="required")
         )
 
     async def process_query(self, query: str):
